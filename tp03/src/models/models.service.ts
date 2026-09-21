@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+<<<<<<< HEAD
 import { TASKS } from './model.js';
 import type { Model, Task } from './model.js';
 //import {ModelModel as DBModel} from '../generated/prisma/models.js';
+=======
+import { Model, Task } from './model.js';
+
+>>>>>>> d005b82689cdc2861ae7747bc50419a70bf94dd3
 /**
  * The service, to be moved from memory to the database.
  *
@@ -29,6 +34,7 @@ import type { Model, Task } from './model.js';
 export class ModelsService {
   constructor(private readonly prisma: PrismaService) {}
 
+<<<<<<< HEAD
 async create(model: Model): Promise<Model> {
   const { org, ...modelData } = model;
 
@@ -107,11 +113,30 @@ async remove(id: string): Promise<boolean> {
 
   return result.count > 0;
 }
+=======
+  async create(model: Model): Promise<Model> {
+    throw new Error('create is not implemented yet');
+  }
+
+  async findAll(filters: { org?: string; task?: Task } = {}): Promise<Model[]> {
+    throw new Error('findAll is not implemented yet');
+  }
+
+  async findOne(id: string): Promise<Model | null> {
+    throw new Error('findOne is not implemented yet');
+  }
+
+  /** Returns `true` if the model existed, `false` otherwise. */
+  async remove(id: string): Promise<boolean> {
+    throw new Error('remove is not implemented yet');
+  }
+>>>>>>> d005b82689cdc2861ae7747bc50419a70bf94dd3
 
   /** Given: used by the tests to start from an empty database. */
   async clear(): Promise<void> {
     await this.prisma.model.deleteMany();
   }
+<<<<<<< HEAD
  private toModel(row: {
   id: string;
   name: string;
@@ -143,4 +168,6 @@ async remove(id: string): Promise<boolean> {
       //license: model.license?? null
 //    }
  // }
+=======
+>>>>>>> d005b82689cdc2861ae7747bc50419a70bf94dd3
 }

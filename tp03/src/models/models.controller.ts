@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -10,7 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateModelDto } from './dto/create-model.dto.js';
-import type { Model, Task } from './model.js';
+import { ModelAlreadyExists, type Model, type Task } from './model.js';
 import { ModelsService } from './models.service.js';
 
 /**
@@ -41,8 +42,13 @@ export class ModelsController {
   }
 
   @Post()
-  create(@Body() dto: CreateModelDto): Promise<Model> {
-    return this.modelsService.create(dto as Model);
+  async create(@Body() dto: CreateModelDto): Promise<Model> {
+    try {
+      return await this.modelsService.create(dto as Model);
+    } catch (error) {
+      if (error instanceof ModelAlreadyExists) throw new ConflictException(error.message);
+      throw error;
+    }
   }
 
   @Delete(':id')

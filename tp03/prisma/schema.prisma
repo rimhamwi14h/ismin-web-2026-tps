@@ -21,6 +21,7 @@ generator client {
 //   }
 //
 // Once written:  npx prisma migrate dev --name init
+<<<<<<< HEAD
 model Model {
   id             String       @id
   name           String
@@ -42,3 +43,8 @@ model Organisation {
 
   models  Model[]
 }
+=======
+
+// 👉 STEP 5: Then add an `Organisation` entity and replace the plain
+//    `org` text field with a real relation. See the README.
+>>>>>>> d005b82689cdc2861ae7747bc50419a70bf94dd3

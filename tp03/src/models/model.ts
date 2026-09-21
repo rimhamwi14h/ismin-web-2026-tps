@@ -28,3 +28,10 @@ export interface Model {
   /** when the model card declares one */
   license?: string;
 }
+
+/** Thrown by the service when a model with this id is already in the catalogue. */
+export class ModelAlreadyExists extends Error {
+  constructor(id: string) {
+    super(`Model ${id} already exists`);
+  }
+}
