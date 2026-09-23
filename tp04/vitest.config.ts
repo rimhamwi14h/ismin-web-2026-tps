@@ -7,5 +7,7 @@ export default defineConfig({
     include: ['test/**/*.e2e-spec.ts'],
     fileParallelism: false,
     setupFiles: ['dotenv/config'],
+    env: { DATABASE_URL: 'file:./test.db' },
+    globalSetup: ['test/global-setup.ts'],
   },
 });

@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 import { ModelsService } from '../src/models/models.service.js';
+import { OrganisationsService } from '../src/organisations/organisations.service.js';
 
 /**
  * The assignment. Reading stays public; writing requires a token; deleting
@@ -10,18 +11,20 @@ import { ModelsService } from '../src/models/models.service.js';
  * Do not modify: make them pass.
  */
 
+const mistralai = { slug: 'mistralai', name: 'Mistral AI', country: 'FR' };
+
 const mistral = {
   id: 'mistral-7b-instruct-v0-3',
   name: 'Mistral-7B-Instruct-v0.3',
   org: 'mistralai',
   task: 'text-generation',
   parameters: 7.25,
-  downloads: 1_420_000,
 };
 
 describe('/models API (protected)', () => {
   let app: INestApplication;
-  let service: ModelsService;
+  let models: ModelsService;
+  let organisations: OrganisationsService;
   let adminToken: string;
   let userToken: string;
 
@@ -42,7 +45,8 @@ describe('/models API (protected)', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
     await app.init();
 
-    service = app.get(ModelsService);
+    models = app.get(ModelsService);
+    organisations = app.get(OrganisationsService);
     adminToken = await login('alice');
     userToken = await login('bob');
   });
@@ -52,7 +56,8 @@ describe('/models API (protected)', () => {
   });
 
   beforeEach(async () => {
-    await service.clear();
+    await models.clear();
+    await organisations.create(mistralai);
   });
 
   // ─── Step 1 ────────────────────────────────────────────────────────────
@@ -82,15 +87,55 @@ describe('/models API (protected)', () => {
     });
 
     it('accepts a creation from a logged-in user', async () => {
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/models')
         .set('Authorization', `Bearer ${userToken}`)
         .send(mistral)
         .expect(201);
+      expect(response.body).toMatchObject({ ...mistral, downloads: 0 });
+    });
+
+    it('rejects a modification without a token', async () => {
+      await request(app.getHttpServer()).patch(`/models/${mistral.id}`).send({ name: 'x' }).expect(401);
+    });
+
+    it('accepts a modification from a logged-in user', async () => {
+      await request(app.getHttpServer()).post('/models').set('Authorization', `Bearer ${userToken}`).send(mistral).expect(201);
+
+      const response = await request(app.getHttpServer())
+        .patch(`/models/${mistral.id}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ license: 'apache-2.0' })
+        .expect(200);
+      expect(response.body).toMatchObject({ ...mistral, license: 'apache-2.0' });
     });
 
     it('rejects a deletion without a token', async () => {
       await request(app.getHttpServer()).delete(`/models/${mistral.id}`).expect(401);
+    });
+  });
+
+  // ─── The rules of the catalogue, already enforced by the given code ────
+  describe('the rules of the catalogue', () => {
+    it('refuses a model whose organisation does not exist', async () => {
+      await request(app.getHttpServer())
+        .post('/models')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ ...mistral, org: 'nobody' })
+        .expect(422);
+    });
+
+    it('refuses a model whose id already exists', async () => {
+      await request(app.getHttpServer()).post('/models').set('Authorization', `Bearer ${userToken}`).send(mistral).expect(201);
+      await request(app.getHttpServer()).post('/models').set('Authorization', `Bearer ${userToken}`).send(mistral).expect(409);
+    });
+
+    it('refuses a download count sent by the client', async () => {
+      await request(app.getHttpServer())
+        .post('/models')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ ...mistral, downloads: 1_000_000 })
+        .expect(400);
     });
   });
 
