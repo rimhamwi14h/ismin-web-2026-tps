@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 import { ModelsService } from '../src/models/models.service.js';
-
+import { PrismaService } from '../src/prisma/prisma.service.js';
 /**
  * Given. Green from the start, except the last one: step 4 reserves the
  * creation of organisations to admins. Read it as an example: a public read,
@@ -38,6 +38,7 @@ describe('/organisations API', () => {
 
   beforeEach(async () => {
     await app.get(ModelsService).clear();
+    await app.get(PrismaService).organisation.deleteMany();
   });
 
   it('lists the organisations, without a token', async () => {

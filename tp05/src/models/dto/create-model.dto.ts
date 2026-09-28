@@ -7,6 +7,7 @@ import {
   Matches,
   Min,
 } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { type Task, TASKS } from '../model.js';
 
 /**
@@ -18,28 +19,34 @@ import { type Task, TASKS } from '../model.js';
  * arrives over the network.
  */
 export class CreateModelDto {
+  @ApiProperty({ example: 'mistral-7b-instruct-v0-3' })
   @IsString()
   @Matches(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
     message: 'id must be a lowercase slug, e.g. "mistral-7b-instruct-v0-3"',
   })
   id!: string;
 
+  @ApiProperty({ example: 'Mistral-7B-Instruct-v0.3' })
   @IsString()
   @IsNotEmpty()
   name!: string;
 
+  @ApiProperty({ description: 'Slug of an existing organisation', example: 'mistralai' })
   @IsString()
   @IsNotEmpty()
   org!: string;
 
+  @ApiProperty({ enum: TASKS, enumName: 'Task' })
   @IsIn(TASKS)
   task!: Task;
 
+  @ApiProperty({ description: 'In billions', minimum: 0, example: 7.25 })
   @IsNumber()
   @Min(0)
   // @Max(2_000) // TODO: which maximum? Llama 405B, and the next ones?
   parameters!: number;
 
+  @ApiPropertyOptional({ example: 'apache-2.0' })
   @IsOptional()
   @IsString()
   license?: string;
