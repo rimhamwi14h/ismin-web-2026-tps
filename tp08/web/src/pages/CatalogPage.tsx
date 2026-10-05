@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { fetchModels } from '../api';
 import { ModelList } from '../components/ModelList';
 import { TaskFilter } from '../components/TaskFilter';
@@ -10,8 +10,11 @@ import type { Task } from '../model';
  * which is now the same for every page.
  */
 export const CatalogPage = () => {
-  const [task, setTask] = useState<Task | undefined>(undefined);
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const task=(searchParams.get('task') ?? undefined) as Task | undefined;
+  const setTask = (newTask: Task | undefined) => {
+    setSearchParams(newTask ? { task: newTask } : {});
+  };
   // The key plays the role of the dependency array: a new task, a new query.
   const { data, error, isPending, isError } = useQuery({
     queryKey: ['models', task],

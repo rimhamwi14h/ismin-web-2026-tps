@@ -1,3 +1,5 @@
+import { Link,NavLink } from "react-router/internal/react-server-client";
+
 /**
  * The top of every page: the title, which leads back to the catalogue.
  *
@@ -9,10 +11,18 @@ export const Header = () => {
     <header className="app-header">
       <div>
         <h1 className="app-title">
-          <a href="/">ModelZoo</a>
+          <Link to="/">ModelZoo</Link>
         </h1>
         <p className="app-tagline">Le catalogue des modèles d'IA</p>
       </div>
+      <nav className="app-nav">
+       <NavLink to="/" end>
+         Catalogue
+       </NavLink>
+       <NavLink to="/about" >
+         À propos
+       </NavLink>
+      </nav>
     </header>
   );
 };

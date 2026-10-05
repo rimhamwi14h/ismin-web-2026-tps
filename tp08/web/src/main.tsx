@@ -1,12 +1,23 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
+import { ApiError} from './api';
 import App from './App';
 import './styles.css';
 
 /** One client for the whole app: it holds the cache of every query. A failed request is retried once. */
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1 } },
+  defaultOptions: { queries: { 
+  retry: (failureCount, error) => {
+  const canRetry =
+    error instanceof ApiError
+      ? error.status >= 500 && error.status < 600
+      : error instanceof TypeError;
+
+  return canRetry && failureCount < 1;
+},
+   } },
 });
 
 /**
@@ -19,8 +30,10 @@ const queryClient = new QueryClient({
  */
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </BrowserRouter>
   </StrictMode>,
 );

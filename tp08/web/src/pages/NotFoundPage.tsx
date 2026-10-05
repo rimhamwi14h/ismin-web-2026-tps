@@ -1,3 +1,5 @@
+import { Link } from "react-router/internal/react-server-client";
+
 /**
  * The page of any URL that no route knows.
  *
@@ -9,7 +11,7 @@ export const NotFoundPage = () => {
     <section className="page not-found">
       <h2>Page introuvable</h2>
       <p>Cette adresse ne correspond à aucune page du catalogue.</p>
-      <a href="/">Retour au catalogue</a>
+      <Link to="/">Retour au catalogue</Link>
     </section>
   );
 };
